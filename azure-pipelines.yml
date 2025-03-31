@@ -3,17 +3,6 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-variables:
-  # Define variables for reuse in the pipeline
-  sonarQubeConnection: 'just-another-vulnerable-java-application'
-  projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
-  projectName: 'just-another-vulnerable-java-application'
-  mavenPomFile: 'pom.xml'
-  testResultsFiles: '**/TEST-*.xml'
-  outputDirectory: '$(Build.ArtifactStagingDirectory)'
-  sonarExclusions: '**/*.test.cs'  # Example: Exclude certain files or folders from analysis
-  pollingTimeoutSec: '300'
-
 trigger:
 - master
 
@@ -23,41 +12,45 @@ pool:
 steps:
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: $(sonarQubeConnection)
+    SonarQube: 'just-another-vulnerable-java-application'
+  # The name of the SonarQube connection in Azure DevOps
     scannerMode: 'CLI'  # Adjust according to your project type
-    projectKey: $(projectKey)  # SonarQube project key
-    projectName: $(projectName)  # SonarQube project name
+    projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'  # SonarQube project key
+    projectName: ' just-another-vulnerable-java-application'  # SonarQube project name
 
-# Build section
+# build section
 - task: Maven@3
   inputs:
-    mavenPomFile: $(mavenPomFile)  # Path to the pom.xml file
+    mavenPomFile: 'pom.xml'  # Path to the pom.xml file
+    # options: '-DskipTests'  # Optional: Skip tests or add any other Maven options
     goals: 'clean install sonar:sonar'  # Goals to be executed
     publishJUnitResults: true  # If you want to publish test results
-    testResultsFiles: $(testResultsFiles)  # Path to test result files if you're running tests
-    outputDirectory: $(outputDirectory)  # Directory for build artifacts
+    testResultsFiles: '**/TEST-*.xml'  # Path to test result files if you're running tests
+    outputDirectory: '$(Build.ArtifactStagingDirectory)'  # Directory for build artifacts
 
-# Analyze section
+# Analyse section
+
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: $(sonarQubeConnection)
+    SonarQube: 'just-another-vulnerable-java-application'
     scannerMode: 'CLI'
-    projectKey: $(projectKey)
-    projectName: $(projectName)
+    projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
+    projectName: 'just-another-vulnerable-java-application'
     extraProperties: |
-      sonar.exclusions=$(sonarExclusions)  # Example: Exclude certain files or folders from analysis
+      sonar.exclusions=**/*.test.cs  # Example: Exclude certain files or folders from analysis
 
-# Publish report
+# publish report
 - task: SonarQubePrepare@5
   inputs:
-    SonarQube: $(sonarQubeConnection)
+    SonarQube: 'just-another-vulnerable-java-application'
     scannerMode: 'CLI'
     configMode: 'manual'
-    cliProjectKey: $(projectKey)
-    cliProjectName: $(projectName)
+    cliProjectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
+    cliProjectName: 'just-another-vulnerable-java-application'
     cliSources: '$(Build.SourcesDirectory)'
 
-# End
+# end
 - task: SonarQubePublish@5
   inputs:
-    pollingTimeoutSec: $(pollingTimeoutSec)
+    pollingTimeoutSec: '300'
+
