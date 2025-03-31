@@ -1,0 +1,63 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+variables:
+  # Define variables for reuse in the pipeline
+  sonarQubeConnection: 'just-another-vulnerable-java-application'
+  projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
+  projectName: 'just-another-vulnerable-java-application'
+  mavenPomFile: 'pom.xml'
+  testResultsFiles: '**/TEST-*.xml'
+  outputDirectory: '$(Build.ArtifactStagingDirectory)'
+  sonarExclusions: '**/*.test.cs'  # Example: Exclude certain files or folders from analysis
+  pollingTimeoutSec: '300'
+
+trigger:
+- master
+
+pool:
+  name: Default
+
+steps:
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: $(sonarQubeConnection)
+    scannerMode: 'CLI'  # Adjust according to your project type
+    projectKey: $(projectKey)  # SonarQube project key
+    projectName: $(projectName)  # SonarQube project name
+
+# Build section
+- task: Maven@3
+  inputs:
+    mavenPomFile: $(mavenPomFile)  # Path to the pom.xml file
+    goals: 'clean install sonar:sonar'  # Goals to be executed
+    publishJUnitResults: true  # If you want to publish test results
+    testResultsFiles: $(testResultsFiles)  # Path to test result files if you're running tests
+    outputDirectory: $(outputDirectory)  # Directory for build artifacts
+
+# Analyze section
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: $(sonarQubeConnection)
+    scannerMode: 'CLI'
+    projectKey: $(projectKey)
+    projectName: $(projectName)
+    extraProperties: |
+      sonar.exclusions=$(sonarExclusions)  # Example: Exclude certain files or folders from analysis
+
+# Publish report
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: $(sonarQubeConnection)
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: $(projectKey)
+    cliProjectName: $(projectName)
+    cliSources: '$(Build.SourcesDirectory)'
+
+# End
+- task: SonarQubePublish@5
+  inputs:
+    pollingTimeoutSec: $(pollingTimeoutSec)
