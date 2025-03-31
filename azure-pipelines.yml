@@ -16,41 +16,4 @@ steps:
   # The name of the SonarQube connection in Azure DevOps
     scannerMode: 'CLI'  # Adjust according to your project type
     projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'  # SonarQube project key
-    projectName: ' just-another-vulnerable-java-application'  # SonarQube project name
-
-# build section
-- task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'  # Path to the pom.xml file
-    # options: '-DskipTests'  # Optional: Skip tests or add any other Maven options
-    goals: 'clean install sonar:sonar'  # Goals to be executed
-    publishJUnitResults: true  # If you want to publish test results
-    testResultsFiles: '**/TEST-*.xml'  # Path to test result files if you're running tests
-    outputDirectory: '$(Build.ArtifactStagingDirectory)'  # Directory for build artifacts
-
-# Analyse section
-
-- task: SonarQubePrepare@5
-  inputs:
-    SonarQube: 'just-another-vulnerable-java-application'
-    scannerMode: 'CLI'
-    projectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
-    projectName: 'just-another-vulnerable-java-application'
-    extraProperties: |
-      sonar.exclusions=**/*.test.cs  # Example: Exclude certain files or folders from analysis
-
-# publish report
-- task: SonarQubePrepare@5
-  inputs:
-    SonarQube: 'just-another-vulnerable-java-application'
-    scannerMode: 'CLI'
-    configMode: 'manual'
-    cliProjectKey: 'sqa_4b5af937493ad29b800499bbdbd971ac1ab68a32'
-    cliProjectName: 'just-another-vulnerable-java-application'
-    cliSources: '$(Build.SourcesDirectory)'
-
-# end
-- task: SonarQubePublish@5
-  inputs:
-    pollingTimeoutSec: '300'
-
+    projectName: 'just-another-vulnerable-java-application'  # SonarQube project name
